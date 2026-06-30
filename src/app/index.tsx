@@ -10,7 +10,7 @@ export function HeaderRight() {
   return (
     <>
       <Pressable
-        onPress={() => router.navigate("/add")}
+        onPress={() => router.navigate("/details")}
         style={({ pressed }) => [styles.Plus, pressed && styles.PlusPressed]}
       >
         <PlusIcon />

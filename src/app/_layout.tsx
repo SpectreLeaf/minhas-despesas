@@ -16,7 +16,6 @@ export default function TabLayout() {
             }}
           />
           <Stack.Screen name="details" options={{ title: "Detalhamento" }} />
-          <Stack.Screen name="add" options={{ title: "Adicionar" }} />
         </Stack>
       </LucideProvider>
     </ThemeProvider>

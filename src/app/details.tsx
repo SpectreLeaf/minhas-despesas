@@ -1,6 +1,6 @@
 import { useTheme } from "@/hooks/use-theme";
 import { Checkbox } from "expo-checkbox";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import CurrencyInput from "react-native-currency-input";
@@ -8,7 +8,7 @@ import CurrencyInput from "react-native-currency-input";
 export default function DetailsScreen() {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useStyles(theme);
 
   const [price, setPrice] = useState<number | null>(null);
   const [isRepeating, setIsRepeating] = useState(false);
@@ -17,71 +17,93 @@ export default function DetailsScreen() {
   const installmentCountRef = useRef<TextInput>(null);
   const currentInstallmentRef = useRef<TextInput>(null);
 
+  async function update() {
+    // TODO
+    router.back();
+  }
+
+  async function create(isPaid: boolean) {
+    // TODO
+    router.back();
+  }
+
+  async function markPaid() {
+    // TODO
+    router.back();
+  }
+
+  async function erase() {
+    // TODO
+    router.back();
+  }
+
   return (
     <View style={styles.Main}>
-      <View>
-        <Text style={styles.Text}>Descrição</Text>
-        <TextInput
-          ref={descriptionRef}
-          style={styles.Input}
-          placeholderTextColor={theme.textSecondary}
-          placeholder="Compras do mês"
-        />
+      <View style={styles.Form}>
+        <View>
+          <Text style={styles.Text}>Descrição</Text>
+          <TextInput
+            ref={descriptionRef}
+            style={styles.Input}
+            placeholderTextColor={theme.textSecondary}
+            placeholder="Compras do mês"
+          />
+        </View>
+
+        <View>
+          <Text style={styles.Text}>Preço</Text>
+          <CurrencyInput
+            value={price}
+            onChangeValue={setPrice}
+            style={styles.Input}
+            placeholderTextColor={theme.textSecondary}
+            placeholder="500,00"
+          />
+        </View>
+
+        <View style={styles.CheckboxContainer}>
+          <Checkbox value={isRepeating} onValueChange={setIsRepeating} />
+          <Text style={styles.Text}>Repetido</Text>
+        </View>
+
+        {isRepeating && (
+          <>
+            <View style={styles.CheckboxContainer}>
+              <Checkbox
+                value={isInInstallments}
+                onValueChange={setIsInInstallments}
+              />
+              <Text style={styles.Text}>Parcelado</Text>
+            </View>
+
+            {isInInstallments && (
+              <>
+                <View>
+                  <Text style={styles.Text}>Número de parcelas</Text>
+                  <TextInput
+                    ref={installmentCountRef}
+                    style={styles.Input}
+                    placeholderTextColor={theme.textSecondary}
+                    keyboardType="number-pad"
+                    placeholder="12"
+                  />
+                </View>
+
+                <View>
+                  <Text style={styles.Text}>Parcela atual</Text>
+                  <TextInput
+                    ref={currentInstallmentRef}
+                    style={styles.Input}
+                    placeholderTextColor={theme.textSecondary}
+                    keyboardType="number-pad"
+                    placeholder="1"
+                  />
+                </View>
+              </>
+            )}
+          </>
+        )}
       </View>
-
-      <View>
-        <Text style={styles.Text}>Preço</Text>
-        <CurrencyInput
-          value={price}
-          onChangeValue={setPrice}
-          style={styles.Input}
-          placeholderTextColor={theme.textSecondary}
-          placeholder="500,00"
-        />
-      </View>
-
-      <View style={styles.CheckboxContainer}>
-        <Checkbox value={isRepeating} onValueChange={setIsRepeating} />
-        <Text style={styles.Text}>Repetido</Text>
-      </View>
-
-      {isRepeating && (
-        <>
-          <View style={styles.CheckboxContainer}>
-            <Checkbox
-              value={isInInstallments}
-              onValueChange={setIsInInstallments}
-            />
-            <Text style={styles.Text}>Parcelado</Text>
-          </View>
-
-          {isInInstallments && (
-            <>
-              <View>
-                <Text style={styles.Text}>Número de parcelas</Text>
-                <TextInput
-                  ref={installmentCountRef}
-                  style={styles.Input}
-                  placeholderTextColor={theme.textSecondary}
-                  keyboardType="number-pad"
-                  placeholder="12"
-                />
-              </View>
-
-              <View>
-                <Text style={styles.Text}>Parcela atual</Text>
-                <TextInput
-                  ref={currentInstallmentRef}
-                  style={styles.Input}
-                  placeholderTextColor={theme.textSecondary}
-                  keyboardType="number-pad"
-                  placeholder="1"
-                />
-              </View>
-            </>
-          )}
-        </>
-      )}
 
       <View style={styles.Buttons}>
         <Pressable
@@ -90,6 +112,7 @@ export default function DetailsScreen() {
             styles.AddButton,
             pressed && styles.ButtonPressed,
           ]}
+          onPress={() => (id ? update() : create(false))}
         >
           <Text style={[styles.ButtonText, { textAlign: "center" }]}>
             {id ? "ATUALIZAR" : "ADICIONAR"}
@@ -101,6 +124,7 @@ export default function DetailsScreen() {
             styles.PaidButton,
             pressed && styles.ButtonPressed,
           ]}
+          onPress={() => (id ? markPaid() : create(true))}
         >
           <Text style={[styles.ButtonText, { textAlign: "center" }]}>PAGO</Text>
         </Pressable>
@@ -110,6 +134,7 @@ export default function DetailsScreen() {
             styles.EraseButton,
             pressed && styles.ButtonPressed,
           ]}
+          onPress={() => (id ? erase() : router.back())}
         >
           <Text style={[styles.ButtonText, { textAlign: "center" }]}>
             APAGAR
@@ -120,9 +145,14 @@ export default function DetailsScreen() {
   );
 }
 
-const makeStyles = (theme: ReturnType<typeof useTheme>) =>
+const useStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
     Main: {
+      display: "flex",
+      justifyContent: "space-between",
+      height: "100%",
+    },
+    Form: {
       padding: 24,
       display: "flex",
       gap: 24,
@@ -130,6 +160,7 @@ const makeStyles = (theme: ReturnType<typeof useTheme>) =>
     Buttons: {
       display: "flex",
       gap: 12,
+      padding: 24,
     },
     CheckboxContainer: {
       display: "flex",

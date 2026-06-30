@@ -1,5 +1,11 @@
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
-import { LucideProvider } from "lucide-react-native";
+import {
+  DarkTheme,
+  DefaultTheme,
+  Link,
+  Stack,
+  ThemeProvider,
+} from "expo-router";
+import { LucideProvider, PlusIcon } from "lucide-react-native";
 import { useColorScheme } from "react-native";
 
 export default function TabLayout() {
@@ -12,7 +18,13 @@ export default function TabLayout() {
             name="index"
             options={{
               title: "Despesas pessoais",
-              headerRight: require("./index").HeaderRight,
+              headerRight: () => (
+                <>
+                  <Link href="/details">
+                    <PlusIcon />
+                  </Link>
+                </>
+              ),
             }}
           />
           <Stack.Screen name="details" options={{ title: "Detalhamento" }} />

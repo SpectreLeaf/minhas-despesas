@@ -1,15 +1,24 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
-
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
+import { LucideProvider } from "lucide-react-native";
+import { useColorScheme } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <LucideProvider color={colorScheme === "dark" ? "#FFFFFF" : "#000000"}>
+        <Stack>
+          <Stack.Screen
+            name="index"
+            options={{
+              title: "Despesas pessoais",
+              headerRight: require("./index").HeaderRight,
+            }}
+          />
+          <Stack.Screen name="details" options={{ title: "Detalhamento" }} />
+          <Stack.Screen name="add" options={{ title: "Adicionar" }} />
+        </Stack>
+      </LucideProvider>
     </ThemeProvider>
   );
 }

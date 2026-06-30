@@ -1,0 +1,6 @@
+# build output
+.expo/
+
+# dependencies
+.pnpm-store/
+pnpm-lock.yaml

@@ -1,13 +1,30 @@
 import { useTheme } from "@/hooks/use-theme";
-import { mockData, type CardData } from "@/lib/mock-data";
+import { getExpensesForMonth, type ExpenseOccurrence } from "@/lib/database";
 import { brlFormatter, monthAsPortugueseName, toDateString } from "@/lib/utils";
-import { Link, router, useLocalSearchParams } from "expo-router";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react-native";
+import {
+  Link,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlusIcon,
+} from "lucide-react-native";
+import { useCallback, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
   const { date } = useLocalSearchParams();
   const currentDate = new Date(date as string);
+  const [expenses, setExpenses] = useState<ExpenseOccurrence[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setExpenses(getExpensesForMonth(currentDate));
+    }, [currentDate]),
+  );
 
   function back() {
     const newDate = new Date(currentDate);
@@ -37,23 +54,39 @@ export default function HomeScreen() {
           {monthAsPortugueseName(currentDate.getMonth())} /{" "}
           {currentDate.getFullYear()}
         </Text>
-        <Pressable onPress={forward}>
-          <ChevronRightIcon color="#000000" />
-        </Pressable>
-      </View>
-
-      <View style={mainStyles.Container}>
-        {mockData.map((card) => (
+        <View style={mainStyles.Actions}>
           <Link
             href={{
               pathname: "/details",
-              params: { id: card.id },
+              params: { month: toDateString(currentDate) },
             }}
-            key={card.id}
           >
-            <Card {...card} />
+            <PlusIcon color="#000000" />
           </Link>
-        ))}
+          <Pressable onPress={forward}>
+            <ChevronRightIcon color="#000000" />
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={mainStyles.Container}>
+        {expenses.length === 0 ? (
+          <Text style={mainStyles.EmptyState}>
+            Nenhuma despesa para este mês ainda.
+          </Text>
+        ) : (
+          expenses.map((card) => (
+            <Link
+              href={{
+                pathname: "/details",
+                params: { id: card.id, month: toDateString(currentDate) },
+              }}
+              key={card.id}
+            >
+              <Card {...card} />
+            </Link>
+          ))
+        )}
       </View>
     </View>
   );
@@ -67,7 +100,7 @@ function Card({
   isInInstallments,
   installmentCount,
   currentInstallment,
-}: CardData) {
+}: ExpenseOccurrence) {
   const theme = useTheme();
   const styles = useCardStyles(theme);
 
@@ -76,7 +109,7 @@ function Card({
       <View>
         <Text style={styles.CardBold}>{description}</Text>
         <Text style={styles.CardDate}>
-          {date.toLocaleDateString("pt-BR")}
+          {new Date(`${date}T00:00:00`).toLocaleDateString("pt-BR")}
           {isInInstallments && (
             <>
               {" "}
@@ -99,9 +132,22 @@ const mainStyles = StyleSheet.create({
     display: "flex",
     justifyContent: "space-between",
     flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  Actions: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
   },
   Container: {
     display: "flex",
+  },
+  EmptyState: {
+    padding: 24,
+    color: "#666666",
+    textAlign: "center",
   },
 });
 

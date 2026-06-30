@@ -1,44 +1,116 @@
 import { useTheme } from "@/hooks/use-theme";
-import { mockData } from "@/lib/mock-data";
+import {
+  createExpense,
+  deleteExpense,
+  getExpenseById,
+  updateExpense,
+  type ExpenseInput,
+} from "@/lib/database";
 import { Checkbox } from "expo-checkbox";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import CurrencyInput from "react-native-currency-input";
 
 export default function DetailsScreen() {
-  const { id } = useLocalSearchParams();
-  const data = mockData.find((card) => card.id === Number(id));
+  const params = useLocalSearchParams<{
+    id?: string;
+    month?: string;
+  }>();
+  const expenseId = params.id ? Number(params.id) : undefined;
+  const initialMonth = params.month as string | undefined;
+  const data = expenseId ? getExpenseById(expenseId) : null;
 
   const theme = useTheme();
   const styles = useStyles(theme);
 
+  const [description, setDescription] = useState(data?.description ?? "");
   const [price, setPrice] = useState<number | null>(data?.price ?? null);
   const [isRepeating, setIsRepeating] = useState(data?.isRepeating ?? false);
   const [isInInstallments, setIsInInstallments] = useState(
     data?.isInInstallments ?? false,
   );
-  const descriptionRef = useRef<TextInput>(null);
-  const installmentCountRef = useRef<TextInput>(null);
-  const currentInstallmentRef = useRef<TextInput>(null);
+  const [installmentCount, setInstallmentCount] = useState(
+    data?.installmentCount ? String(data.installmentCount) : "",
+  );
+  const [currentInstallment, setCurrentInstallment] = useState(
+    data?.currentInstallment ? String(data.currentInstallment) : "",
+  );
+
+  useEffect(() => {
+    if (data) {
+      setDescription(data.description);
+      setPrice(data.price);
+      setIsRepeating(data.isRepeating);
+      setIsInInstallments(data.isInInstallments);
+      setInstallmentCount(
+        data.installmentCount ? String(data.installmentCount) : "",
+      );
+      setCurrentInstallment(
+        data.currentInstallment ? String(data.currentInstallment) : "",
+      );
+    }
+  }, [data?.id]);
 
   async function update() {
-    // TODO
+    if (!expenseId) {
+      return;
+    }
+
+    const payload: ExpenseInput = {
+      description: description.trim(),
+      date:
+        data?.date ?? initialMonth ?? new Date().toISOString().split("T")[0],
+      price: price ?? 0,
+      paid: data?.paid ?? false,
+      isRepeating,
+      isInInstallments,
+      installmentCount: isInInstallments ? Number(installmentCount) || 1 : null,
+      currentInstallment: isInInstallments
+        ? Number(currentInstallment) || 1
+        : null,
+    };
+
+    updateExpense(expenseId, payload);
     router.back();
   }
 
   async function create(isPaid: boolean) {
-    // TODO
+    if (!description.trim() || price === null) {
+      return;
+    }
+
+    const payload: ExpenseInput = {
+      description: description.trim(),
+      date: initialMonth ?? new Date().toISOString().split("T")[0],
+      price,
+      paid: isPaid,
+      isRepeating,
+      isInInstallments,
+      installmentCount: isInInstallments ? Number(installmentCount) || 1 : null,
+      currentInstallment: isInInstallments
+        ? Number(currentInstallment) || 1
+        : null,
+    };
+
+    createExpense(payload);
     router.back();
   }
 
   async function togglePaid(isPaid: boolean) {
-    // TODO
+    if (!expenseId) {
+      return;
+    }
+
+    updateExpense(expenseId, { paid: isPaid });
     router.back();
   }
 
   async function erase() {
-    // TODO
+    if (expenseId) {
+      deleteExpense(expenseId);
+    }
+
     router.back();
   }
 
@@ -48,8 +120,8 @@ export default function DetailsScreen() {
         <View>
           <Text style={styles.Text}>Descrição</Text>
           <TextInput
-            ref={descriptionRef}
-            defaultValue={data?.description}
+            value={description}
+            onChangeText={setDescription}
             style={styles.Input}
             placeholderTextColor={theme.textSecondary}
             placeholder="Compras do mês"
@@ -77,7 +149,13 @@ export default function DetailsScreen() {
             <View style={styles.CheckboxContainer}>
               <Checkbox
                 value={isInInstallments}
-                onValueChange={setIsInInstallments}
+                onValueChange={(value) => {
+                  setIsInInstallments(value);
+                  if (!value) {
+                    setInstallmentCount("");
+                    setCurrentInstallment("");
+                  }
+                }}
               />
               <Text style={styles.Text}>Parcelado</Text>
             </View>
@@ -87,8 +165,8 @@ export default function DetailsScreen() {
                 <View>
                   <Text style={styles.Text}>Número de parcelas</Text>
                   <TextInput
-                    ref={installmentCountRef}
-                    defaultValue={String(data?.installmentCount)}
+                    value={installmentCount}
+                    onChangeText={setInstallmentCount}
                     style={styles.Input}
                     placeholderTextColor={theme.textSecondary}
                     keyboardType="number-pad"
@@ -99,8 +177,8 @@ export default function DetailsScreen() {
                 <View>
                   <Text style={styles.Text}>Parcela atual</Text>
                   <TextInput
-                    ref={currentInstallmentRef}
-                    defaultValue={String(data?.currentInstallment)}
+                    value={currentInstallment}
+                    onChangeText={setCurrentInstallment}
                     style={styles.Input}
                     placeholderTextColor={theme.textSecondary}
                     keyboardType="number-pad"
@@ -120,10 +198,10 @@ export default function DetailsScreen() {
             styles.AddButton,
             pressed && styles.ButtonPressed,
           ]}
-          onPress={() => (id ? update() : create(false))}
+          onPress={() => (expenseId ? update() : create(false))}
         >
           <Text style={[styles.ButtonText, { textAlign: "center" }]}>
-            {id ? "ATUALIZAR" : "ADICIONAR"}
+            {expenseId ? "ATUALIZAR" : "ADICIONAR"}
           </Text>
         </Pressable>
         <Pressable
@@ -132,7 +210,7 @@ export default function DetailsScreen() {
             data?.paid ? styles.NotPaidButton : styles.PaidButton,
             pressed && styles.ButtonPressed,
           ]}
-          onPress={() => (id ? togglePaid(!data?.paid) : create(true))}
+          onPress={() => (expenseId ? togglePaid(!data?.paid) : create(true))}
         >
           <Text style={[styles.ButtonText, { textAlign: "center" }]}>
             {data?.paid ? "NÃO PAGO" : "PAGO"}
@@ -144,7 +222,7 @@ export default function DetailsScreen() {
             styles.EraseButton,
             pressed && styles.ButtonPressed,
           ]}
-          onPress={() => (id ? erase() : router.back())}
+          onPress={() => (expenseId ? erase() : router.back())}
         >
           <Text style={[styles.ButtonText, { textAlign: "center" }]}>
             APAGAR

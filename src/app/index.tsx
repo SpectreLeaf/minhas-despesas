@@ -1,41 +1,10 @@
 import { useTheme } from "@/hooks/use-theme";
+import { mockData, type CardData } from "@/lib/mock-data";
 import { brlFormatter, monthAsPortugueseName } from "@/lib/utils";
 import { Link } from "expo-router";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
-interface CardData {
-  id: number;
-  description: string;
-  date: Date;
-  price: number;
-  paid: boolean;
-  isInInstallments: boolean;
-  installmentCount?: number;
-  currentInstallment?: number;
-}
-
-const mockData: CardData[] = [
-  {
-    id: 0,
-    date: new Date(),
-    description: "Despesa 1",
-    price: 900.0,
-    paid: true,
-    isInInstallments: true,
-    installmentCount: 12,
-    currentInstallment: 3,
-  },
-  {
-    id: 1,
-    date: new Date(),
-    description: "Despesa 2",
-    price: 100.0,
-    paid: false,
-    isInInstallments: false,
-  },
-];
 
 export default function HomeScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -73,12 +42,11 @@ export default function HomeScreen() {
       </View>
 
       <View style={mainStyles.Container}>
-        {/* TODO actually fetch data */}
         {mockData.map((card) => (
           <Link
             href={{
               pathname: "/details",
-              params: { id: 0 },
+              params: { id: card.id },
             }}
             key={card.id}
           >

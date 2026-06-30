@@ -1,4 +1,5 @@
 import { useTheme } from "@/hooks/use-theme";
+import { mockData } from "@/lib/mock-data";
 import { Checkbox } from "expo-checkbox";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
@@ -7,12 +8,16 @@ import CurrencyInput from "react-native-currency-input";
 
 export default function DetailsScreen() {
   const { id } = useLocalSearchParams();
+  const data = mockData.find((card) => card.id === Number(id));
+
   const theme = useTheme();
   const styles = useStyles(theme);
 
-  const [price, setPrice] = useState<number | null>(null);
-  const [isRepeating, setIsRepeating] = useState(false);
-  const [isInInstallments, setIsInInstallments] = useState(false);
+  const [price, setPrice] = useState<number | null>(data?.price ?? null);
+  const [isRepeating, setIsRepeating] = useState(data?.isRepeating ?? false);
+  const [isInInstallments, setIsInInstallments] = useState(
+    data?.isInInstallments ?? false,
+  );
   const descriptionRef = useRef<TextInput>(null);
   const installmentCountRef = useRef<TextInput>(null);
   const currentInstallmentRef = useRef<TextInput>(null);
@@ -27,7 +32,7 @@ export default function DetailsScreen() {
     router.back();
   }
 
-  async function markPaid() {
+  async function togglePaid(isPaid: boolean) {
     // TODO
     router.back();
   }
@@ -44,6 +49,7 @@ export default function DetailsScreen() {
           <Text style={styles.Text}>Descrição</Text>
           <TextInput
             ref={descriptionRef}
+            defaultValue={data?.description}
             style={styles.Input}
             placeholderTextColor={theme.textSecondary}
             placeholder="Compras do mês"
@@ -82,6 +88,7 @@ export default function DetailsScreen() {
                   <Text style={styles.Text}>Número de parcelas</Text>
                   <TextInput
                     ref={installmentCountRef}
+                    defaultValue={String(data?.installmentCount)}
                     style={styles.Input}
                     placeholderTextColor={theme.textSecondary}
                     keyboardType="number-pad"
@@ -93,6 +100,7 @@ export default function DetailsScreen() {
                   <Text style={styles.Text}>Parcela atual</Text>
                   <TextInput
                     ref={currentInstallmentRef}
+                    defaultValue={String(data?.currentInstallment)}
                     style={styles.Input}
                     placeholderTextColor={theme.textSecondary}
                     keyboardType="number-pad"
@@ -121,12 +129,14 @@ export default function DetailsScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.Button,
-            styles.PaidButton,
+            data?.paid ? styles.NotPaidButton : styles.PaidButton,
             pressed && styles.ButtonPressed,
           ]}
-          onPress={() => (id ? markPaid() : create(true))}
+          onPress={() => (id ? togglePaid(!data?.paid) : create(true))}
         >
-          <Text style={[styles.ButtonText, { textAlign: "center" }]}>PAGO</Text>
+          <Text style={[styles.ButtonText, { textAlign: "center" }]}>
+            {data?.paid ? "NÃO PAGO" : "PAGO"}
+          </Text>
         </Pressable>
         <Pressable
           style={({ pressed }) => [
@@ -185,6 +195,9 @@ const useStyles = (theme: ReturnType<typeof useTheme>) =>
     },
     PaidButton: {
       backgroundColor: "#61B100",
+    },
+    NotPaidButton: {
+      backgroundColor: "#ffab4a",
     },
     EraseButton: {
       backgroundColor: "#FF504A",

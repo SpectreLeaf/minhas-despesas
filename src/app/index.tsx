@@ -1,3 +1,4 @@
+import { toDateString } from "@/lib/utils";
 import { Redirect } from "expo-router";
 
 export default function IndexScreen() {
@@ -5,7 +6,7 @@ export default function IndexScreen() {
     <Redirect
       href={{
         pathname: "/[date]",
-        params: { date: new Date().toISOString() },
+        params: { date: toDateString(new Date()) },
       }}
     />
   );

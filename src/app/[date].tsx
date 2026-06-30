@@ -1,6 +1,6 @@
 import { useTheme } from "@/hooks/use-theme";
 import { mockData, type CardData } from "@/lib/mock-data";
-import { brlFormatter, monthAsPortugueseName } from "@/lib/utils";
+import { brlFormatter, monthAsPortugueseName, toDateString } from "@/lib/utils";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -14,7 +14,7 @@ export default function HomeScreen() {
     newDate.setMonth(newDate.getMonth() - 1);
     router.replace({
       pathname: "/[date]",
-      params: { date: newDate.toISOString() },
+      params: { date: toDateString(newDate) },
     });
   }
 
@@ -23,7 +23,7 @@ export default function HomeScreen() {
     newDate.setMonth(newDate.getMonth() + 1);
     router.replace({
       pathname: "/[date]",
-      params: { date: newDate.toISOString() },
+      params: { date: toDateString(newDate) },
     });
   }
 

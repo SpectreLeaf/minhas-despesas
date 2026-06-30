@@ -3,6 +3,10 @@ export const brlFormatter = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+export function toDateString(date: Date) {
+  return date.toISOString().split("T")[0];
+}
+
 export function monthAsPortugueseName(month: number) {
   switch (month) {
     case 0:

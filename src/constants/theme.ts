@@ -24,8 +24,10 @@ export const Colors = {
   },
 } as const;
 
+/** @lintignore */
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+/** @lintignore */
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
@@ -51,6 +53,7 @@ export const Fonts = Platform.select({
   },
 });
 
+/** @lintignore */
 export const Spacing = {
   half: 2,
   one: 4,
@@ -61,5 +64,7 @@ export const Spacing = {
   six: 64,
 } as const;
 
+/** @lintignore */
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+/** @lintignore */
 export const MaxContentWidth = 800;

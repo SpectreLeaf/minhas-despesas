@@ -31,10 +31,10 @@ export default function DetailsScreen() {
     data?.isInInstallments ?? false,
   );
   const [installmentCount, setInstallmentCount] = useState(
-    data?.installmentCount ? String(data.installmentCount) : "",
+    data?.installmentCount ? String(data.installmentCount) : "12",
   );
   const [currentInstallment, setCurrentInstallment] = useState(
-    data?.currentInstallment ? String(data.currentInstallment) : "",
+    data?.currentInstallment ? String(data.currentInstallment) : "1",
   );
 
   useEffect(() => {

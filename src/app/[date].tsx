@@ -13,10 +13,11 @@ import {
   PlusIcon,
 } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
   const { date } = useLocalSearchParams();
+
   const currentDate = new Date(date as string);
   const [expenses, setExpenses] = useState<ExpenseOccurrence[]>([]);
 
@@ -45,7 +46,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View>
+    <View style={mainStyles.Main}>
       <View style={mainStyles.DatePicker}>
         <Pressable onPress={back}>
           <ChevronLeftIcon color="#000000" />
@@ -69,7 +70,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View style={mainStyles.Container}>
+      <ScrollView style={mainStyles.Container}>
         {expenses.length === 0 ? (
           <Text style={mainStyles.EmptyState}>
             Nenhuma despesa para este mês ainda.
@@ -87,6 +88,29 @@ export default function HomeScreen() {
             </Link>
           ))
         )}
+      </ScrollView>
+
+      <View style={mainStyles.Total}>
+        <View style={mainStyles.TotalTextContainer}>
+          <Text style={mainStyles.TotalText}>Total: </Text>
+          <Text style={mainStyles.TotalBoldText}>
+            {brlFormatter.format(
+              expenses.reduce((acc, expense) => (acc += expense.price), 0),
+            )}
+          </Text>
+        </View>
+
+        <View style={mainStyles.TotalTextContainer}>
+          <Text style={mainStyles.TotalText}>A pagar: </Text>
+          <Text style={mainStyles.TotalBoldText}>
+            {brlFormatter.format(
+              expenses.reduce(
+                (acc, expense) => (acc += expense.paid ? 0 : expense.price),
+                0,
+              ),
+            )}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -126,6 +150,27 @@ function Card({
 }
 
 const mainStyles = StyleSheet.create({
+  Main: {
+    display: "flex",
+    justifyContent: "space-between",
+    flex: 1,
+  },
+  Total: {
+    padding: 24,
+    backgroundColor: "#50b0ff",
+  },
+  TotalTextContainer: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  TotalText: {
+    color: "#000000",
+  },
+  TotalBoldText: {
+    color: "#000000",
+    fontWeight: "bold",
+  },
+
   DatePicker: {
     backgroundColor: "#50b0ff",
     padding: 12,
@@ -143,6 +188,8 @@ const mainStyles = StyleSheet.create({
   },
   Container: {
     display: "flex",
+    flex: 1,
+    overflowY: "scroll",
   },
   EmptyState: {
     padding: 24,

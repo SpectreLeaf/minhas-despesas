@@ -7,7 +7,12 @@ export default function TabLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <LucideProvider color={colorScheme === "dark" ? "#FFFFFF" : "#000000"}>
-        <Stack>
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: "#50b0ff" },
+            headerTintColor: "#000",
+          }}
+        >
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen
             name="[date]"

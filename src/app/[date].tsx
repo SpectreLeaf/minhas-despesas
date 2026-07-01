@@ -17,6 +17,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
   const { date } = useLocalSearchParams();
+  const theme = useTheme();
+  const mainStyles = useMainStyles(theme);
 
   const currentDate = new Date(date as string);
   const [expenses, setExpenses] = useState<ExpenseOccurrence[]>([]);
@@ -49,9 +51,11 @@ export default function HomeScreen() {
     <View style={mainStyles.Main}>
       <View style={mainStyles.DatePicker}>
         <Pressable onPress={back}>
-          <ChevronLeftIcon color="#000000" />
+          <ChevronLeftIcon color={theme.accentText} />
         </Pressable>
-        <Text style={{ color: "#000000", fontWeight: "bold", fontSize: 20 }}>
+        <Text
+          style={{ color: theme.accentText, fontWeight: "bold", fontSize: 20 }}
+        >
           {monthAsPortugueseName(currentDate.getMonth())} /{" "}
           {currentDate.getFullYear()}
         </Text>
@@ -62,10 +66,10 @@ export default function HomeScreen() {
               params: { month: toDateString(currentDate) },
             }}
           >
-            <PlusIcon color="#000000" />
+            <PlusIcon color={theme.accentText} />
           </Link>
           <Pressable onPress={forward}>
-            <ChevronRightIcon color="#000000" />
+            <ChevronRightIcon color={theme.accentText} />
           </Pressable>
         </View>
       </View>
@@ -149,54 +153,55 @@ function Card({
   );
 }
 
-const mainStyles = StyleSheet.create({
-  Main: {
-    display: "flex",
-    justifyContent: "space-between",
-    flex: 1,
-  },
-  Total: {
-    padding: 24,
-    backgroundColor: "#50b0ff",
-  },
-  TotalTextContainer: {
-    display: "flex",
-    flexDirection: "row",
-  },
-  TotalText: {
-    color: "#000000",
-  },
-  TotalBoldText: {
-    color: "#000000",
-    fontWeight: "bold",
-  },
+const useMainStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    Main: {
+      display: "flex",
+      justifyContent: "space-between",
+      flex: 1,
+    },
+    Total: {
+      padding: 24,
+      backgroundColor: theme.accent,
+    },
+    TotalTextContainer: {
+      display: "flex",
+      flexDirection: "row",
+    },
+    TotalText: {
+      color: theme.accentText,
+    },
+    TotalBoldText: {
+      color: theme.accentText,
+      fontWeight: "bold",
+    },
 
-  DatePicker: {
-    backgroundColor: "#50b0ff",
-    padding: 12,
-    display: "flex",
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  Actions: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "center",
-  },
-  Container: {
-    display: "flex",
-    flex: 1,
-    overflowY: "scroll",
-  },
-  EmptyState: {
-    padding: 24,
-    color: "#666666",
-    textAlign: "center",
-  },
-});
+    DatePicker: {
+      backgroundColor: theme.accent,
+      padding: 12,
+      display: "flex",
+      justifyContent: "space-between",
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    Actions: {
+      display: "flex",
+      flexDirection: "row",
+      gap: 12,
+      alignItems: "center",
+    },
+    Container: {
+      display: "flex",
+      flex: 1,
+      overflowY: "scroll",
+    },
+    EmptyState: {
+      padding: 24,
+      color: "#666666",
+      textAlign: "center",
+    },
+  });
 
 const useCardStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
